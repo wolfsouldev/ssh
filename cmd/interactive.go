@@ -12,6 +12,7 @@ import (
 
 func runInteractive() {
 	ui.PrintBanner()
+	ui.PrintAstronaut()
 
 	v, err := vault.New()
 	if err != nil {
@@ -132,7 +133,9 @@ func interactiveMainLoop(v *vault.Vault, masterPass []byte, data *vault.VaultDat
 			} else {
 				// Search by name/host/user
 				results := searchCredentials(data, choice)
-				if len(results) == 1 {
+				if len(results) == 0 {
+					ui.PrintWarn("No match for '%s'", choice)
+				} else if len(results) == 1 {
 					cred := results[0]
 					ui.PrintInfo("Found: %s%s%s (%s@%s)",
 						ui.BrightWhite, cred.Alias, ui.Reset+ui.Cyan, cred.User, cred.Host)
@@ -140,10 +143,18 @@ func interactiveMainLoop(v *vault.Vault, masterPass []byte, data *vault.VaultDat
 						ui.BrightCyan, cred.Alias, ui.Reset)) {
 						connectFromMenu(cred)
 					}
-				} else if len(results) > 0 {
-					showSearchResults(results)
 				} else {
-					ui.PrintWarn("No match for '%s'", choice)
+					showSearchResults(results, choice)
+					pick := strings.TrimSpace(ui.ReadLine(
+						fmt.Sprintf("  %s%s▸%s %s# to connect (Enter to cancel):%s ",
+							ui.Bold, ui.BrightGreen, ui.Reset, ui.Dim, ui.Reset)))
+					if pick != "" {
+						if num, err := strconv.Atoi(pick); err == nil && num >= 1 && num <= len(results) {
+							connectFromMenu(results[num-1])
+						} else {
+							ui.PrintError("Invalid selection")
+						}
+					}
 				}
 			}
 		}
@@ -204,20 +215,27 @@ func showActionBar() {
 	ui.PrintDivider()
 }
 
-func showSearchResults(results []*vault.Credential) {
+func showSearchResults(results []*vault.Credential, query string) {
 	fmt.Println()
-	ui.PrintInfo("Found %d matches:", len(results))
-	fmt.Println()
-	for _, c := range results {
-		authIcon := "🔑"
+	ui.PrintHeader(fmt.Sprintf("Search: \"%s\"  ─  %d matches", query, len(results)))
+
+	headers := []string{"#", "NAME", "TARGET", "PORT", "AUTH"}
+	rows := make([][]string, 0, len(results))
+	for i, c := range results {
+		authIcon := "🔑 pass"
 		if c.AuthType == vault.AuthPrivateKey {
-			authIcon = "📄"
+			authIcon = "📄 key"
 		}
-		fmt.Printf("  %s%s%-15s%s  %s%s@%s%s  %s\n",
-			ui.Bold, ui.BrightWhite, c.Alias, ui.Reset,
-			ui.Cyan, c.User, c.Host, ui.Reset,
-			authIcon)
+		rows = append(rows, []string{
+			fmt.Sprintf("%d", i+1),
+			c.Alias,
+			fmt.Sprintf("%s@%s", c.User, c.Host),
+			fmt.Sprintf("%d", c.Port),
+			authIcon,
+		})
 	}
+
+	ui.PrintTable(headers, rows)
 }
 
 func printMenuOption(key, text string) {

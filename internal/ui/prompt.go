@@ -61,9 +61,29 @@ const Banner = `
 ` + Dim + BrightGreen + `   ─── Secure Shell Handler ───────` + Reset + `
 `
 
+// ── Astronaut ASCII Art ──
+
+const Astronaut = `` +
+	Dim + `          ·  .  ` + BrightYellow + `★` + Reset + Dim + `  .  ·` + Reset + "\n" +
+	BrightWhite + `         ╭───────────╮` + Reset + "\n" +
+	BrightWhite + `         │ ╭───────╮ │` + Reset + "\n" +
+	BrightWhite + `         │ │` + BrightGreen + ` ◉   ◉ ` + BrightWhite + `│ │` + Reset + "\n" +
+	BrightWhite + `         │ │` + Dim + `   ─   ` + Reset + BrightWhite + `│ │` + Reset + "\n" +
+	BrightWhite + `         │ ╰───────╯ │` + Reset + "\n" +
+	BrightWhite + `         ╰─────┬─────╯` + Reset + "\n" +
+	Cyan + `         ╭─────┴─────╮` + Reset + "\n" +
+	Cyan + `         │` + BrightGreen + ` >` + Bold + ` SSHH ` + Reset + Cyan + `_ │` + Reset + "\n" +
+	Cyan + `         ╰───────────╯` + Reset + "\n" +
+	Dim + `          ·  .  ` + BrightBlue + `·` + Reset + Dim + `  .  ·` + Reset + "\n"
+
 // PrintBanner prints the ASCII art banner.
 func PrintBanner() {
 	fmt.Print(Banner)
+}
+
+// PrintAstronaut prints the astronaut ASCII art.
+func PrintAstronaut() {
+	fmt.Print(Astronaut)
 }
 
 // ── Input Functions ──
