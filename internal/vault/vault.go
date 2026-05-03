@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/astro/sshh/internal/crypto"
+	"github.com/wolfsouldev/ssh/internal/crypto"
 )
 
 // AuthType represents the type of authentication stored.

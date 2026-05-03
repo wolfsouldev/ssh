@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/astro/sshh/internal/installer"
-	"github.com/astro/sshh/internal/ui"
+	"github.com/wolfsouldev/ssh/internal/installer"
+	"github.com/wolfsouldev/ssh/internal/ui"
 	"github.com/spf13/cobra"
 )
 
