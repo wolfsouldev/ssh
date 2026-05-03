@@ -17,11 +17,9 @@ var portFlag int
 var rootCmd = &cobra.Command{
 	Use:   "sshh [user@host]",
 	Short: "SSHH - Secure SSH credential manager & connector",
-	Long: `SSHH is a secure SSH credential manager that stores your SSH 
-credentials encrypted with a master password. Connect to your servers 
-instantly without remembering individual passwords.`,
-	Args: cobra.MaximumNArgs(1),
-	Run:  connectCmd,
+	Long:  ui.Banner + "\n  Secure SSH credential manager. Store your SSH\n  credentials encrypted with a master password.\n  Connect to your servers instantly.",
+	Args:  cobra.MaximumNArgs(1),
+	Run:   connectCmd,
 }
 
 func init() {
@@ -47,6 +45,7 @@ func Execute() {
 
 func connectCmd(cmd *cobra.Command, args []string) {
 	if len(args) == 0 {
+		ui.PrintBanner()
 		cmd.Help()
 		return
 	}
@@ -63,7 +62,7 @@ func connectCmd(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	fmt.Printf("\n  Connecting to %s@%s:%d ...\n", user, host, port)
+	ui.PrintConnecting(user, host, port)
 
 	v, err := vault.New()
 	if err != nil {
@@ -72,8 +71,7 @@ func connectCmd(cmd *cobra.Command, args []string) {
 	}
 
 	if v.Exists() {
-		// Try to find saved credentials
-		masterPass, err := ui.ReadPassword("  🔑 Master password: ")
+		masterPass, err := ui.ReadPassword(ui.PasswordPrompt("Master password"))
 		if err != nil {
 			ui.PrintError("Error: %v", err)
 			return
@@ -88,18 +86,18 @@ func connectCmd(cmd *cobra.Command, args []string) {
 		cred := v.FindByHostUser(data, host, user)
 		if cred != nil {
 			ui.PrintSuccess("Credentials found for %s@%s", user, host)
+			fmt.Println()
 			if err := connectWithCred(cred); err != nil {
 				ui.PrintError("Connection failed: %v", err)
 			}
+			ui.PrintSessionEnd()
 			return
 		}
 
-		// No saved credentials - ask for password and connect
-		ui.PrintInfo("No saved credentials for %s@%s", user, host)
+		ui.PrintWarn("No saved credentials for %s@%s", user, host)
 		connectAndOfferSave(v, masterPass, user, host, port)
 	} else {
-		// No vault exists yet
-		ui.PrintInfo("No vault found. Connecting without saved credentials.")
+		ui.PrintWarn("No vault found. Connecting without saved credentials.")
 		connectNewNoVault(v, user, host, port)
 	}
 }
@@ -116,12 +114,14 @@ func connectWithCred(cred *vault.Credential) error {
 }
 
 func connectAndOfferSave(v *vault.Vault, masterPass []byte, user, host string, port int) {
-	password, err := ui.ReadPassword(fmt.Sprintf("  Password for %s@%s: ", user, host))
+	password, err := ui.ReadPassword(ui.PasswordPrompt(fmt.Sprintf("Password for %s@%s", user, host)))
 	if err != nil {
 		ui.PrintError("Error: %v", err)
 		return
 	}
 
+	ui.PrintInfo("Authenticating with password...")
+	fmt.Println()
 	err = sshclient.ConnectWithPassword(host, port, user, string(password))
 	if err != nil {
 		ui.PrintError("Connection failed: %v", err)
@@ -129,11 +129,13 @@ func connectAndOfferSave(v *vault.Vault, masterPass []byte, user, host string, p
 	}
 
 	// After disconnecting, offer to save
-	fmt.Println()
-	if ui.Confirm("  Save credentials for " + user + "@" + host + "?") {
-		alias := ui.ReadLine("  Alias (leave empty for " + user + "@" + host + "): ")
+	ui.PrintSessionEnd()
+	ui.PrintHeader("Save Credentials")
+	if ui.Confirm("  Save credentials for " + ui.BrightCyan + user + "@" + host + ui.Reset + "?") {
+		defaultAlias := fmt.Sprintf("%s@%s", user, host)
+		alias := ui.ReadLine(ui.InputPrompt(fmt.Sprintf("Alias [%s]", defaultAlias)))
 		if alias == "" {
-			alias = fmt.Sprintf("%s@%s", user, host)
+			alias = defaultAlias
 		}
 
 		cred := vault.Credential{
@@ -154,12 +156,14 @@ func connectAndOfferSave(v *vault.Vault, masterPass []byte, user, host string, p
 }
 
 func connectNewNoVault(v *vault.Vault, user, host string, port int) {
-	password, err := ui.ReadPassword(fmt.Sprintf("  Password for %s@%s: ", user, host))
+	password, err := ui.ReadPassword(ui.PasswordPrompt(fmt.Sprintf("Password for %s@%s", user, host)))
 	if err != nil {
 		ui.PrintError("Error: %v", err)
 		return
 	}
 
+	ui.PrintInfo("Authenticating with password...")
+	fmt.Println()
 	err = sshclient.ConnectWithPassword(host, port, user, string(password))
 	if err != nil {
 		ui.PrintError("Connection failed: %v", err)
@@ -167,15 +171,17 @@ func connectNewNoVault(v *vault.Vault, user, host string, port int) {
 	}
 
 	// After disconnecting, offer to save
-	fmt.Println()
-	if ui.Confirm("  Save credentials?") {
-		ui.PrintInfo("First, set up a master password to encrypt your vault.")
-		masterPass, err := ui.ReadPassword("  New master password: ")
+	ui.PrintSessionEnd()
+	ui.PrintHeader("Create Vault & Save")
+	if ui.Confirm("  Save credentials to encrypted vault?") {
+		ui.PrintInfo("Set up a master password to encrypt your vault.")
+		fmt.Println()
+		masterPass, err := ui.ReadPassword(ui.PasswordPrompt("New master password"))
 		if err != nil {
 			ui.PrintError("Error: %v", err)
 			return
 		}
-		confirmPass, err := ui.ReadPassword("  Confirm master password: ")
+		confirmPass, err := ui.ReadPassword(ui.PasswordPrompt("Confirm master password"))
 		if err != nil {
 			ui.PrintError("Error: %v", err)
 			return
@@ -190,9 +196,10 @@ func connectNewNoVault(v *vault.Vault, user, host string, port int) {
 			return
 		}
 
-		alias := ui.ReadLine("  Alias (leave empty for " + user + "@" + host + "): ")
+		defaultAlias := fmt.Sprintf("%s@%s", user, host)
+		alias := ui.ReadLine(ui.InputPrompt(fmt.Sprintf("Alias [%s]", defaultAlias)))
 		if alias == "" {
-			alias = fmt.Sprintf("%s@%s", user, host)
+			alias = defaultAlias
 		}
 
 		cred := vault.Credential{

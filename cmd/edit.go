@@ -17,6 +17,7 @@ var editCommand = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		alias := args[0]
+		ui.PrintBanner()
 
 		v, err := vault.New()
 		if err != nil {
@@ -29,7 +30,7 @@ var editCommand = &cobra.Command{
 			return
 		}
 
-		masterPass, err := ui.ReadPassword("  🔑 Master password: ")
+		masterPass, err := ui.ReadPassword(ui.PasswordPrompt("Master password"))
 		if err != nil {
 			ui.PrintError("Error: %v", err)
 			return
@@ -49,36 +50,37 @@ var editCommand = &cobra.Command{
 
 		ui.PrintHeader("Editing: " + alias)
 		ui.PrintInfo("Press Enter to keep current value")
+		fmt.Println()
 
 		err = v.UpdateCredential(masterPass, alias, func(c *vault.Credential) {
-			newHost := ui.ReadLine(fmt.Sprintf("  Host [%s]: ", c.Host))
+			newHost := ui.ReadLine(ui.InputPrompt(fmt.Sprintf("Host [%s]", c.Host)))
 			if newHost != "" {
 				c.Host = newHost
 			}
 
-			newUser := ui.ReadLine(fmt.Sprintf("  User [%s]: ", c.User))
+			newUser := ui.ReadLine(ui.InputPrompt(fmt.Sprintf("User [%s]", c.User)))
 			if newUser != "" {
 				c.User = newUser
 			}
 
-			newPort := ui.ReadLine(fmt.Sprintf("  Port [%d]: ", c.Port))
+			newPort := ui.ReadLine(ui.InputPrompt(fmt.Sprintf("Port [%d]", c.Port)))
 			if newPort != "" {
 				if p, err := strconv.Atoi(newPort); err == nil {
 					c.Port = p
 				}
 			}
 
-			newAlias := ui.ReadLine(fmt.Sprintf("  Alias [%s]: ", c.Alias))
+			newAlias := ui.ReadLine(ui.InputPrompt(fmt.Sprintf("Alias [%s]", c.Alias)))
 			if newAlias != "" {
 				c.Alias = newAlias
 			}
 
-			newAuthType := ui.ReadLine(fmt.Sprintf("  Auth type [%s]: ", c.AuthType))
+			newAuthType := ui.ReadLine(ui.InputPrompt(fmt.Sprintf("Auth type [%s]", c.AuthType)))
 			newAuthType = strings.ToLower(strings.TrimSpace(newAuthType))
 
 			if newAuthType == "key" || newAuthType == "privatekey" {
 				c.AuthType = vault.AuthPrivateKey
-				keyPath := ui.ReadLine("  Path to new private key (empty to keep): ")
+				keyPath := ui.ReadLine(ui.InputPrompt("Path to new private key (empty to keep)"))
 				if keyPath != "" {
 					keyData, err := os.ReadFile(keyPath)
 					if err != nil {
@@ -88,14 +90,14 @@ var editCommand = &cobra.Command{
 					}
 				}
 				if ui.Confirm("  Update key passphrase?") {
-					keyPass, err := ui.ReadPassword("  New key passphrase: ")
+					keyPass, err := ui.ReadPassword(ui.PasswordPrompt("New key passphrase"))
 					if err == nil {
 						c.KeyPass = string(keyPass)
 					}
 				}
 			} else if newAuthType == "password" || (newAuthType == "" && c.AuthType == vault.AuthPassword) {
 				if ui.Confirm("  Update password?") {
-					pass, err := ui.ReadPassword("  New SSH password: ")
+					pass, err := ui.ReadPassword(ui.PasswordPrompt("New SSH password"))
 					if err == nil {
 						c.Password = string(pass)
 					}
@@ -108,6 +110,7 @@ var editCommand = &cobra.Command{
 			return
 		}
 
+		fmt.Println()
 		ui.PrintSuccess("Credential updated")
 	},
 }

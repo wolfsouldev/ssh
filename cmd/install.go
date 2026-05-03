@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/wolfsouldev/ssh/internal/installer"
 	"github.com/wolfsouldev/ssh/internal/ui"
 	"github.com/spf13/cobra"
@@ -10,10 +12,12 @@ var installCommand = &cobra.Command{
 	Use:   "install",
 	Short: "Install sshh globally (adds to PATH)",
 	Run: func(cmd *cobra.Command, args []string) {
+		ui.PrintBanner()
 		ui.PrintHeader("Installing SSHH")
 
 		if installer.IsInstalled() {
-			if !ui.Confirm("  SSHH is already installed. Reinstall?") {
+			ui.PrintWarn("SSHH is already installed.")
+			if !ui.Confirm("  Reinstall?") {
 				return
 			}
 		}
@@ -23,6 +27,7 @@ var installCommand = &cobra.Command{
 			return
 		}
 
+		fmt.Println()
 		ui.PrintSuccess("SSHH installed successfully!")
 		ui.PrintInfo("Restart your terminal and type 'sshh' to get started.")
 	},
@@ -32,6 +37,7 @@ var uninstallCommand = &cobra.Command{
 	Use:   "uninstall",
 	Short: "Uninstall sshh from PATH",
 	Run: func(cmd *cobra.Command, args []string) {
+		ui.PrintBanner()
 		ui.PrintHeader("Uninstalling SSHH")
 
 		if !installer.IsInstalled() {
@@ -39,7 +45,7 @@ var uninstallCommand = &cobra.Command{
 			return
 		}
 
-		if !ui.Confirm("  Are you sure you want to uninstall SSHH?") {
+		if !ui.Confirm("  " + ui.Red + "Are you sure you want to uninstall SSHH?" + ui.Reset) {
 			return
 		}
 
@@ -48,7 +54,8 @@ var uninstallCommand = &cobra.Command{
 			return
 		}
 
+		fmt.Println()
 		ui.PrintSuccess("SSHH uninstalled")
-		ui.PrintInfo("Your vault data in %%APPDATA%%\\sshh is preserved.")
+		ui.PrintInfo("Your vault data is preserved.")
 	},
 }

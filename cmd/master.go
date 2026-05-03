@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/wolfsouldev/ssh/internal/ui"
 	"github.com/wolfsouldev/ssh/internal/vault"
 	"github.com/spf13/cobra"
@@ -10,6 +12,8 @@ var masterCommand = &cobra.Command{
 	Use:   "master",
 	Short: "Change the master password",
 	Run: func(cmd *cobra.Command, args []string) {
+		ui.PrintBanner()
+
 		v, err := vault.New()
 		if err != nil {
 			ui.PrintError("Vault error: %v", err)
@@ -23,19 +27,19 @@ var masterCommand = &cobra.Command{
 
 		ui.PrintHeader("Change Master Password")
 
-		oldPass, err := ui.ReadPassword("  Current master password: ")
+		oldPass, err := ui.ReadPassword(ui.PasswordPrompt("Current master password"))
 		if err != nil {
 			ui.PrintError("Error: %v", err)
 			return
 		}
 
-		newPass, err := ui.ReadPassword("  New master password: ")
+		newPass, err := ui.ReadPassword(ui.PasswordPrompt("New master password"))
 		if err != nil {
 			ui.PrintError("Error: %v", err)
 			return
 		}
 
-		confirmPass, err := ui.ReadPassword("  Confirm new master password: ")
+		confirmPass, err := ui.ReadPassword(ui.PasswordPrompt("Confirm new master password"))
 		if err != nil {
 			ui.PrintError("Error: %v", err)
 			return
@@ -56,6 +60,7 @@ var masterCommand = &cobra.Command{
 			return
 		}
 
+		fmt.Println()
 		ui.PrintSuccess("Master password changed successfully")
 	},
 }

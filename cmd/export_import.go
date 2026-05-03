@@ -17,6 +17,8 @@ var exportCommand = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		outFile := args[0]
+		ui.PrintBanner()
+		ui.PrintHeader("Export Vault")
 
 		v, err := vault.New()
 		if err != nil {
@@ -29,7 +31,7 @@ var exportCommand = &cobra.Command{
 			return
 		}
 
-		masterPass, err := ui.ReadPassword("  🔑 Master password: ")
+		masterPass, err := ui.ReadPassword(ui.PasswordPrompt("Master password"))
 		if err != nil {
 			ui.PrintError("Error: %v", err)
 			return
@@ -60,7 +62,9 @@ var exportCommand = &cobra.Command{
 			return
 		}
 
+		fmt.Println()
 		ui.PrintSuccess("Vault exported to %s (%d credentials)", outFile, len(data.Credentials))
+		ui.PrintKeyValue("File:", outFile)
 	},
 }
 
@@ -70,6 +74,8 @@ var importCommand = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		inFile := args[0]
+		ui.PrintBanner()
+		ui.PrintHeader("Import Vault")
 
 		v, err := vault.New()
 		if err != nil {
@@ -78,7 +84,8 @@ var importCommand = &cobra.Command{
 		}
 
 		if v.Exists() {
-			if !ui.Confirm("  A vault already exists. Import will REPLACE it. Continue?") {
+			ui.PrintWarn("A vault already exists.")
+			if !ui.Confirm("  " + ui.Red + "Import will REPLACE it. Continue?" + ui.Reset) {
 				return
 			}
 		}
@@ -89,7 +96,7 @@ var importCommand = &cobra.Command{
 			return
 		}
 
-		importPass, err := ui.ReadPassword("  Password for imported file: ")
+		importPass, err := ui.ReadPassword(ui.PasswordPrompt("Password for imported file"))
 		if err != nil {
 			ui.PrintError("Error: %v", err)
 			return
@@ -110,7 +117,7 @@ var importCommand = &cobra.Command{
 		// Ask for master password for the new local vault
 		var masterPass []byte
 		if v.Exists() {
-			masterPass, err = ui.ReadPassword("  🔑 Your local master password: ")
+			masterPass, err = ui.ReadPassword(ui.PasswordPrompt("Your local master password"))
 			if err != nil {
 				ui.PrintError("Error: %v", err)
 				return
@@ -121,12 +128,12 @@ var importCommand = &cobra.Command{
 				return
 			}
 		} else {
-			masterPass, err = ui.ReadPassword("  Set a master password for local vault: ")
+			masterPass, err = ui.ReadPassword(ui.PasswordPrompt("Set a master password for local vault"))
 			if err != nil {
 				ui.PrintError("Error: %v", err)
 				return
 			}
-			confirm, err := ui.ReadPassword("  Confirm master password: ")
+			confirm, err := ui.ReadPassword(ui.PasswordPrompt("Confirm master password"))
 			if err != nil {
 				ui.PrintError("Error: %v", err)
 				return
@@ -143,6 +150,7 @@ var importCommand = &cobra.Command{
 			return
 		}
 
+		fmt.Println()
 		ui.PrintSuccess("Imported %d credentials", len(data.Credentials))
 	},
 }
