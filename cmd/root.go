@@ -45,8 +45,7 @@ func Execute() {
 
 func connectCmd(cmd *cobra.Command, args []string) {
 	if len(args) == 0 {
-		ui.PrintBanner()
-		cmd.Help()
+		runInteractive()
 		return
 	}
 
@@ -90,6 +89,7 @@ func connectCmd(cmd *cobra.Command, args []string) {
 			if err := connectWithCred(cred); err != nil {
 				ui.PrintError("Connection failed: %v", err)
 			}
+			ui.FlushStdin()
 			ui.PrintSessionEnd()
 			return
 		}
@@ -129,11 +129,12 @@ func connectAndOfferSave(v *vault.Vault, masterPass []byte, user, host string, p
 	}
 
 	// After disconnecting, offer to save
+	ui.FlushStdin()
 	ui.PrintSessionEnd()
 	ui.PrintHeader("Save Credentials")
 	if ui.Confirm("  Save credentials for " + ui.BrightCyan + user + "@" + host + ui.Reset + "?") {
 		defaultAlias := fmt.Sprintf("%s@%s", user, host)
-		alias := ui.ReadLine(ui.InputPrompt(fmt.Sprintf("Alias [%s]", defaultAlias)))
+		alias := ui.ReadLine(ui.InputPrompt(fmt.Sprintf("Name [%s]", defaultAlias)))
 		if alias == "" {
 			alias = defaultAlias
 		}
@@ -171,6 +172,7 @@ func connectNewNoVault(v *vault.Vault, user, host string, port int) {
 	}
 
 	// After disconnecting, offer to save
+	ui.FlushStdin()
 	ui.PrintSessionEnd()
 	ui.PrintHeader("Create Vault & Save")
 	if ui.Confirm("  Save credentials to encrypted vault?") {
@@ -197,7 +199,7 @@ func connectNewNoVault(v *vault.Vault, user, host string, port int) {
 		}
 
 		defaultAlias := fmt.Sprintf("%s@%s", user, host)
-		alias := ui.ReadLine(ui.InputPrompt(fmt.Sprintf("Alias [%s]", defaultAlias)))
+		alias := ui.ReadLine(ui.InputPrompt(fmt.Sprintf("Name [%s]", defaultAlias)))
 		if alias == "" {
 			alias = defaultAlias
 		}
