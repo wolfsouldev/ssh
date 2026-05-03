@@ -18,7 +18,10 @@ builds:
       - amd64
       - arm64
     ldflags:
-      - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}}
+      - -s -w
+      - -X github.com/wolfsouldev/ssh/internal/version.Version={{.Version}}
+      - -X github.com/wolfsouldev/ssh/internal/version.Commit={{.Commit}}
+      - -X github.com/wolfsouldev/ssh/internal/version.Date={{.Date}}
 
 archives:
   - format: tar.gz

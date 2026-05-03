@@ -34,6 +34,8 @@ func init() {
 	rootCmd.AddCommand(uninstallCommand)
 	rootCmd.AddCommand(exportCommand)
 	rootCmd.AddCommand(importCommand)
+	rootCmd.AddCommand(versionCommand)
+	rootCmd.AddCommand(updateCommand)
 }
 
 // Execute runs the root command.
