@@ -1,0 +1,41 @@
+run:
+  timeout: 5m
+  modules-download-mode: readonly
+
+linters:
+  enable:
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - gofmt
+    - goimports
+    - misspell
+    - unconvert
+    - gocritic
+    - revive
+
+linters-settings:
+  revive:
+    rules:
+      - name: exported
+        severity: warning
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - style
+      - performance
+  misspell:
+    locale: US
+
+issues:
+  exclude-use-default: false
+  max-issues-per-linter: 50
+  max-same-issues: 5
+
+output:
+  formats:
+    - format: colored-line-number
+  sort-results: true
