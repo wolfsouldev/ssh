@@ -1,4 +1,4 @@
-module github.com/astro/sshh
+module github.com/wolfsouldev/ssh
 
 go 1.25.0
 

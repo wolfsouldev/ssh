@@ -1,6 +1,6 @@
 package main
 
-import "github.com/astro/sshh/cmd"
+import "github.com/wolfsouldev/ssh/cmd"
 
 func main() {
 	cmd.Execute()

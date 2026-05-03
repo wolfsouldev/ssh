@@ -62,7 +62,7 @@ $ sshh admin@production-server
 
 ### From releases
 
-Download the latest binary for your platform from [**Releases**](https://github.com/astro/sshh/releases):
+Download the latest binary for your platform from [**Releases**](https://github.com/wolfsouldev/ssh/releases):
 
 | Platform        | Archive                          |
 | --------------- | -------------------------------- |
@@ -79,7 +79,7 @@ Download the latest binary for your platform from [**Releases**](https://github.
 <summary><b>🪟 Windows (PowerShell)</b></summary>
 
 ```powershell
-git clone https://github.com/astro/sshh.git
+git clone https://github.com/wolfsouldev/ssh.git
 cd sshh
 go build -o sshh.exe .
 ```
@@ -90,7 +90,7 @@ go build -o sshh.exe .
 <summary><b>🐧 Linux / 🍎 macOS (Bash)</b></summary>
 
 ```bash
-git clone https://github.com/astro/sshh.git
+git clone https://github.com/wolfsouldev/ssh.git
 cd sshh
 go build -o sshh .
 ```
@@ -251,7 +251,7 @@ sshh/
 ### Quick start
 
 ```bash
-git clone https://github.com/astro/sshh.git
+git clone https://github.com/wolfsouldev/ssh.git
 cd sshh
 go mod download
 
@@ -295,7 +295,7 @@ Please read our [**Contributing Guide**](CONTRIBUTING.md) for details on:
 - Commit message conventions (Conventional Commits)
 - Pull request process
 
-See the [open issues](https://github.com/astro/sshh/issues) for a list of proposed features and known issues.
+See the [open issues](https://github.com/wolfsouldev/ssh/issues) for a list of proposed features and known issues.
 
 ---
 
@@ -337,6 +337,6 @@ Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for more informa
 
 **[⬆ Back to top](#)**
 
-Made with ❤️ by [Astro](https://github.com/astro)
+Made with ❤️ by [wolfsouldev](https://github.com/wolfsouldev)
 
 </div>
